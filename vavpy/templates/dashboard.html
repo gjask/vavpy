@@ -1,0 +1,19 @@
+{% extends "main.html" %}
+
+{% block content %}
+    <ul>
+        <li>New Entry</li>
+        <li>From Entry</li>
+    </ul>
+    <table>
+        {% for cnt in start_list %}
+            <tr>
+                <td>Up Down Del ?</td>
+                <td><a href="{{ url_for('edit') }}">{{ cnt.number }}</a></td>
+                <td>{{ cnt.number | start_time }}</td>
+                <td>{{ cnt.category }}</td>
+                <td>{{ cnt.name }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

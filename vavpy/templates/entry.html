@@ -1,0 +1,12 @@
+{% extends "main.html" %}
+
+{% block content %}
+    <table>
+        {% for field in form %}
+        <tr>
+            <td>{{ field.lable }}</td>
+            <td>{{ field }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
