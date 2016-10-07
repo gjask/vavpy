@@ -1,0 +1,22 @@
+{% macro render_form_or_field(field) %}
+    {% if isrecursive(field) %}
+        {% for subfield in field  %}
+            {% if isformfield(subfield) %}
+                {{ render_form_or_field(subfield.form) }}
+            {% else %}
+                {{ render_form_or_field(subfield) }}
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <dt>{{ field.label }}
+        <dd>{{ field(**kwargs)|safe }}
+        {% if field.errors %}
+            <ul class=errors>
+            {% for error in field.errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        </dd>
+    {% endif %}
+{% endmacro %}

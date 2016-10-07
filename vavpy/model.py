@@ -1,16 +1,30 @@
 from peewee import Model, CharField, IntegerField, ForeignKeyField,\
-    DateTimeField, BooleanField
+    DateTimeField, BooleanField, TimeField, PrimaryKeyField
 import datetime
 import random
 import string
 from playhouse import db_url
 
 
+first_start = datetime.time(9, 30)  # todo move to database or setting
+step = datetime.timedelta(seconds=30)
+
+
 # __all__ = []
-__all__ = ['Categories', 'Entry', 'Contact', 'Contestant', 'Start', 'Check']
+__all__ = ['Category', 'Entry', 'Contact', 'Contestant', 'Start', 'Check']
 
 _letters = string.ascii_letters + string.digits
-db = db_url.connect('sqlite://test.db')
+db = db_url.connect('sqlite:///test.db')
+
+
+def dt_add(time, delta):
+    realtime = datetime.datetime.combine(datetime.date.today(), time)
+    realtime += delta
+    return realtime.time()
+
+
+def new_passcode():
+    return ''.join(ch for ch in random.choice(_letters))
 
 
 class BaseModel(Model):
@@ -22,8 +36,11 @@ class BaseModel(Model):
     #     __all__.append(cls.__name__)
 
 
-class Categories(BaseModel):
+class Category(BaseModel):
     name = CharField()
+
+    def __unicode__(self):
+        return self.name
 
 
 class Contact(BaseModel):
@@ -39,30 +56,43 @@ class Contact(BaseModel):
 class Entry(BaseModel):
     # code = CharField()
     created = DateTimeField(default=datetime.datetime.now)
-    pass_code = CharField()
+    pass_code = CharField(default=new_passcode)
     contact = ForeignKeyField(Contact)
 
     @property
     def code(self):
         return '{}{}'.format(self.created.year, self.id)  # todo
 
-    @staticmethod
-    def new_passcode():
-        return ''.join(ch for ch in random.choice(_letters))
-
 
 class Contestant(BaseModel):
     name = CharField()
-    category = ForeignKeyField(Categories)
+    category = ForeignKeyField(Category)
     entry = ForeignKeyField(Entry, 'contestants')
 
 
 class Start(BaseModel):
-    contestant = ForeignKeyField(Contestant)
-    number = IntegerField(index=True, unique=True)  # sequence=
-    # time = DateTimeField()
-    real_time = DateTimeField(null=True)
+    number = PrimaryKeyField()
+    contestant = ForeignKeyField(Contestant, 'starts', unique=True)
+    # number = IntegerField(index=True, unique=True)  # sequence=
+    real_time = TimeField(null=True)
     disqualified = BooleanField(default=False)
+
+    @property
+    def time(self):
+        return dt_add(first_start, step * (self.number - 1))
+
+    # @classmethod
+    # def schedule_entry(cls, entry):
+    #     source = (Contestant
+    #               .select(Contestant.id)
+    #               .where(Contestant.entry == entry)
+    #               )
+    #     cls.insert_from([cls.contestant], source).execute()
+
+    @classmethod
+    def schedule_contestants(cls, contestants):
+        cls.insert_many({'contestant': c} for c in contestants).execute()
+
 
 
 # class Time(BaseModel):

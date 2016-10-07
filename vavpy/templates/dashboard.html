@@ -1,18 +1,20 @@
 {% extends "main.html" %}
 
 {% block content %}
-    <ul>
-        <li>New Entry</li>
-        <li>From Entry</li>
-    </ul>
+    <button onclick="window.location.href='{{ url_for('edit_entry_view') }}'">New Entry</button>
+    <form method="post">
+        {% for field in pass_code_form %}
+            {{ field() }}
+        {% endfor %}
+    </form>
     <table>
         {% for cnt in start_list %}
             <tr>
-                <td>Up Down Del ?</td>
-                <td><a href="{{ url_for('edit') }}">{{ cnt.number }}</a></td>
-                <td>{{ cnt.number | start_time }}</td>
-                <td>{{ cnt.category }}</td>
-                <td>{{ cnt.name }}</td>
+{#                <td>Up Down Edit Del ?</td>#}
+                <td>{{ cnt.number }}</td>
+                <td>{{ cnt.time }}</td>
+                <td>{{ cnt.contestant.category.name }}</td>
+                <td>{{ cnt.contestant.name }}</td>
             </tr>
         {% endfor %}
     </table>

@@ -1,12 +1,27 @@
+{#{% from "macros.html" import render_form_or_field with context %}#}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 {%  block head %}
     <meta charset="UTF-8">
     <title>Vavřinecký potok</title>
+    <style>
+    {% block style %}
+        table, th, td {
+            border: solid 1px;
+            border-collapse: collapse;
+        }
+    {% endblock %}
+    </style>
 {% endblock %}
 </head>
 <body>
+<div class="flashes">
+    {% for message in get_flashed_messages() %}
+    <h3>{{ message }}</h3>
+    {% endfor %}
+</div>
 {% block content %}
 {% endblock %}
 </body>
