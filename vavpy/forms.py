@@ -14,8 +14,8 @@ from vavpy.model import Contact, Contestant, Category
 
 # class ContestantForm(Form):
 #     id = IntegerField()  # widget=HiddenInput())
-#     name = StringField(validators=[validators.required])
-#     category = SelectField(validators=[validators.required], choices=[])
+#     name = StringField(validators=[validators.DataRequired()])
+#     category = SelectField(validators=[validators.DataRequired()], choices=[])
 #
 #     # def __init__(self, *args, **kwargs):
 #     #     cats = Category.select()
@@ -47,5 +47,19 @@ class NewEntryForm(Form):
 
 
 class FromCodeEntryForm(Form):
-    pass_code = StringField()
+    pass_code = StringField(validators=[validators.DataRequired()])
     paste = SubmitField('Add')
+
+
+class PrintStartListForm(Form):
+    from_page = SelectField(coerce=int)
+    to_page = SelectField(coerce=int)
+    print_list = SubmitField('Print Start List')
+
+    def set_values(self, page_count, fpage, tpage):
+        choices = [(x, str(x)) for x in range(1, page_count + 1)]
+        self.from_page.choices = choices
+        self.to_page.choices = choices
+        if not self.from_page.data or not self.to_page.data:
+            self.from_page.data = fpage
+            self.to_page.data = tpage

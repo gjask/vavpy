@@ -1,22 +1,46 @@
 {#{% from "macros.html" import render_form_or_field with context %}#}
+{% from "macros.html" import simple_form %}
+{% set title='Vavřinecký potok' %}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
 {%  block head %}
     <meta charset="UTF-8">
-    <title>Vavřinecký potok</title>
+    <title>{{ title }}</title>
     <style>
     {% block style %}
+        body {
+            font-size: 0.9em;
+        }
+        div, table, div, p, span, input, button {
+            margin-bottom: 6px;
+            font-size: 0.9em;
+
+        }
+        form table, form td, form th {
+            border: none;
+        }
+        td input {
+            margin: 0;
+        }
         table, th, td {
             border: solid 1px;
             border-collapse: collapse;
+            padding: 3px;
+        }
+        table.contact {
+{#            float: left;#}
+        }
+        .header {
+            font: 1.4em bold
         }
     {% endblock %}
     </style>
 {% endblock %}
 </head>
 <body>
+{#<h1>{{ title }}</h1>#}
 <div class="flashes">
     {% for message in get_flashed_messages() %}
     <h3>{{ message }}</h3>

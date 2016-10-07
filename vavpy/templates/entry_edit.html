@@ -11,15 +11,16 @@
 {% endblock %}
 
 {% block content %}
+    <span class="header">Edit Entry</span>
     <form method="POST">
         {{ form.contact() }}
         <div data-toggle="fieldset" id="contestant-fieldset">
-        <button type="button" data-toggle="fieldset-add-row" data-target="#contestant-fieldset">Add</button>
             <table>
                 <tr>
                 {% for item in form.contestants[0] %}
                     <th>{{ item.label.text }}</th>
                 {% endfor %}
+                    <th>Remove</th>
                 </tr>
             {% for contestant in form.contestants %}
                 <tr data-toggle="fieldset-entry">
@@ -30,6 +31,7 @@
                 </tr>
             {% endfor %}
             </table>
+            <button type="button" data-toggle="fieldset-add-row" data-target="#contestant-fieldset">Add Line</button>
         </div>
         {{ form.save }}
         {{ form.paste }}
@@ -43,6 +45,8 @@
             </ul>
         {% endif %}
     </form>
+
+    <a href="{{ url_for('dashboard_view') }}">Back</a>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='dynamic-form.js') }}"></script>

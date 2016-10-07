@@ -9,6 +9,9 @@ app = Flask(__name__)
 app.secret_key = 'SOME_BULLSHIT'
 
 
+_page_size = 30
+
+
 # @app.template_global()
 # def isrecursive(field):
 #     return isinstance(field, (Form, FieldList))
@@ -25,10 +28,16 @@ app.secret_key = 'SOME_BULLSHIT'
 
 @app.route('/', methods=('GET', 'POST'))
 def dashboard_view():
-    start_list = Start.select().order_by(Start.number)
+    start_list = Start.select().order_by(Start.number.desc())
     code_form = FromCodeEntryForm(request.form)
+    print_form = PrintStartListForm(request.form)
+    print_form.set_values(
+        -(-len(start_list) // _page_size),
+        1,
+        len(start_list) // _page_size
+    )
 
-    if request.method == 'POST' and code_form.validate():
+    if request.method == 'POST' and code_form.validate():  # todo self-aware form
         code = code_form.pass_code.data
         try:
             entry = Entry.get(pass_code=code)  # todo, fix this bullshit
@@ -37,10 +46,19 @@ def dashboard_view():
         else:
             return redirect(url_for('edit_entry_view', entry_id=entry.id))
 
+    # raise
+    if request.method == 'POST' and print_form.validate():
+        return redirect(url_for(
+            'start_list_view',
+            from_n=_page_size * (print_form.from_page.data - 1) + 1,
+            to_n=_page_size * print_form.to_page.data
+        ))
+
     return render_template(
         'dashboard.html',
         start_list=start_list,
-        pass_code_form=code_form
+        pass_code_form=code_form,
+        print_form=print_form
     )
 
 
@@ -95,3 +113,14 @@ def list_entry_view(entry_id):
 
     return render_template('entry_list.html', entry=entry)
 
+
+@app.route('/start')
+@app.route('/start/<int:from_n>')
+@app.route('/start/<int:from_n>-<int:to_n>')
+def start_list_view(from_n=None, to_n=None):
+    start_list = Start.select()
+    if from_n is not None:
+        start_list = start_list.offset(from_n - 1)
+    if to_n is not None:
+        start_list = start_list.limit(to_n - from_n + 1)
+    return render_template('start_list.html', start_list=start_list)

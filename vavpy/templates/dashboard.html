@@ -1,12 +1,14 @@
 {% extends "main.html" %}
 
 {% block content %}
-    <button onclick="window.location.href='{{ url_for('edit_entry_view') }}'">New Entry</button>
+    <span class="header">Dashboard</span><br>
+    <a href="{{ url_for('edit_entry_view') }}">New Entry</a>
+    {{ simple_form(pass_code_form) }}
+    {{ simple_form(print_form) }}
     <form method="post">
-        {% for field in pass_code_form %}
-            {{ field() }}
-        {% endfor %}
+
     </form>
+    <span class="header">Start List</span>
     <table>
         {% for cnt in start_list %}
             <tr>

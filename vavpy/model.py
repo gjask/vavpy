@@ -94,7 +94,6 @@ class Start(BaseModel):
         cls.insert_many({'contestant': c} for c in contestants).execute()
 
 
-
 # class Time(BaseModel):
 #     gate = IntegerField()
 #     line = IntegerField()
