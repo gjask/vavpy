@@ -5,9 +5,25 @@
     <a href="{{ url_for('edit_entry_view') }}">New Entry</a>
     {{ simple_form(pass_code_form) }}
     {{ simple_form(print_form) }}
-    <form method="post">
-
+    <span class="header">Upload Checkpoint</span>
+{#    {{ simple_form(check_form) }}#}
+    <form method="POST" enctype="multipart/form-data">
+    {% for field in check_form %}
+        {{ field() }}
+        {% for error in field.errors %}
+            {{ error }}
+        {% endfor %}
+    {% endfor %}
     </form>
+    <span class="header">Uploaded Checkpoints</span><br>
+    {% for check in checkpoints %}
+        {{ check.gate }}({{ check.count }})
+    {% endfor %}
+    <br>
+    <span class="header">Results</span><br>
+    {% for cat in categories %}
+        <a href="{{ url_for('results_view', category=cat.name) }}">{{ cat.name }}</a>
+    {% endfor %}<br>
     <span class="header">Start List</span>
     <table>
         {% for cnt in start_list %}
@@ -17,6 +33,7 @@
                 <td>{{ cnt.time }}</td>
                 <td>{{ cnt.contestant.category.name }}</td>
                 <td>{{ cnt.contestant.name }}</td>
+                <td>{{ cnt.contestant.entry.contact.club }}</td>
             </tr>
         {% endfor %}
     </table>

@@ -1,5 +1,8 @@
 from flask import Flask, render_template, abort, request, redirect, url_for,\
     flash
+from playhouse.flask_utils import get_object_or_404
+from peewee import fn
+import io
 
 from vavpy.forms import *
 from .model import *
@@ -7,6 +10,9 @@ from .model import *
 
 app = Flask(__name__)
 app.secret_key = 'SOME_BULLSHIT'
+app.config['DATABASE'] = 'sqlite:///test.db'
+
+db.init_app(app)
 
 
 _page_size = 30
@@ -29,6 +35,10 @@ _page_size = 30
 @app.route('/', methods=('GET', 'POST'))
 def dashboard_view():
     start_list = Start.select().order_by(Start.number.desc())
+    checkpoints = Check.select(Check.gate, fn.Count(Check.id).alias('count'))\
+        .group_by(Check.gate)
+
+    check_form = UploadCheckForm(request.form)
     code_form = FromCodeEntryForm(request.form)
     print_form = PrintStartListForm(request.form)
     print_form.set_values(
@@ -37,16 +47,23 @@ def dashboard_view():
         len(start_list) // _page_size
     )
 
-    if request.method == 'POST' and code_form.validate():  # todo self-aware form
-        code = code_form.pass_code.data
-        try:
-            entry = Entry.get(pass_code=code)  # todo, fix this bullshit
-        except Entry.DoesNotExist:
-            flash('Entry with code %s does not found!' % code)
-        else:
-            return redirect(url_for('edit_entry_view', entry_id=entry.id))
+    # Upload checkpoint table
+    if request.method == 'POST' and check_form.validate():
+        file = request.files[check_form.table.name]
+        Check.delete()\
+            .where(Check.gate == check_form.check_number.data)\
+            .execute()
+        stream = io.TextIOWrapper(file.stream)
+        Check.from_csv(stream, check_form.check_number.data)
+        flash('Checkpoint data uploaded successfully')
+        return redirect(url_for('dashboard_view'))
 
-    # raise
+    # Add entry from pre-registration
+    if request.method == 'POST' and code_form.validate():
+        entry_id = Entry.get_id(code_form.code.data)
+        return redirect(url_for('edit_entry_view', entry_id=entry_id))
+
+    # Print start list
     if request.method == 'POST' and print_form.validate():
         return redirect(url_for(
             'start_list_view',
@@ -56,9 +73,12 @@ def dashboard_view():
 
     return render_template(
         'dashboard.html',
+        categories=Category.select(),
         start_list=start_list,
         pass_code_form=code_form,
-        print_form=print_form
+        print_form=print_form,
+        check_form=check_form,
+        checkpoints=checkpoints
     )
 
 
@@ -68,10 +88,7 @@ def edit_entry_view(entry_id=None):
     # consider using db.atomic() or db.transaction()
 
     if entry_id is not None:
-        try:
-            entry = Entry.get(id=entry_id)
-        except Entry.DoesNotExist:
-            abort(404)
+        entry = get_object_or_404(Entry, (Entry.id == entry_id))
         form = NewEntryForm(request.form, entry)
     else:
         entry = Entry()
@@ -106,11 +123,7 @@ def edit_entry_view(entry_id=None):
 
 @app.route('/entry/<int:entry_id>')
 def list_entry_view(entry_id):
-    try:
-        entry = Entry.get(id=entry_id)
-    except Entry.DoesNotExist:
-        abort(404)
-
+    entry = get_object_or_404(Entry, (Entry.id == entry_id))
     return render_template('entry_list.html', entry=entry)
 
 
@@ -124,3 +137,10 @@ def start_list_view(from_n=None, to_n=None):
     if to_n is not None:
         start_list = start_list.limit(to_n - from_n + 1)
     return render_template('start_list.html', start_list=start_list)
+
+
+@app.route('/results')
+@app.route('/results/<category>')
+def results_view(category=None):
+
+    return render_template('results.html')

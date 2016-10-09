@@ -1,7 +1,7 @@
 # from flask_wtf import Form
 from wtforms import Form
 from wtforms import FormField, FieldList, StringField, SubmitField, \
-    IntegerField, SelectField, HiddenField, validators
+    IntegerField, SelectField, HiddenField, validators, FileField
 from wtforms.widgets import HiddenInput
 from wtfpeewee.orm import model_form, ModelConverter, PrimaryKeyField
 
@@ -47,7 +47,7 @@ class NewEntryForm(Form):
 
 
 class FromCodeEntryForm(Form):
-    pass_code = StringField(validators=[validators.DataRequired()])
+    code = StringField(validators=[validators.DataRequired()])
     paste = SubmitField('Add')
 
 
@@ -63,3 +63,9 @@ class PrintStartListForm(Form):
         if not self.from_page.data or not self.to_page.data:
             self.from_page.data = fpage
             self.to_page.data = tpage
+
+
+class UploadCheckForm(Form):
+    check_number = IntegerField(validators=[validators.DataRequired()])
+    table = FileField()  # validators=[validators.DataRequired()])
+    upload = SubmitField()

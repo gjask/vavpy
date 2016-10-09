@@ -3,7 +3,8 @@ from peewee import Model, CharField, IntegerField, ForeignKeyField,\
 import datetime
 import random
 import string
-from playhouse import db_url
+import csv
+from playhouse import db_url, flask_utils
 
 
 first_start = datetime.time(9, 30)  # todo move to database or setting
@@ -11,10 +12,11 @@ step = datetime.timedelta(seconds=30)
 
 
 # __all__ = []
-__all__ = ['Category', 'Entry', 'Contact', 'Contestant', 'Start', 'Check']
+__all__ = ['Category', 'Entry', 'Contact', 'Contestant', 'Start', 'Check', 'db']
 
 _letters = string.ascii_letters + string.digits
-db = db_url.connect('sqlite:///test.db')
+# db = db_url.connect('sqlite:///test.db')
+db = flask_utils.FlaskDB()
 
 
 def dt_add(time, delta):
@@ -27,23 +29,23 @@ def new_passcode():
     return ''.join(ch for ch in random.choice(_letters))
 
 
-class BaseModel(Model):
-    class Meta:
-        database = db
+# class BaseModel(Model):
+#     class Meta:
+#         database = db
+#
+#     # def __new__(cls, *args, **kwargs):
+#     #     super(BaseModel, cls).__new__(cls, *args, **kwargs)
+#     #     __all__.append(cls.__name__)
 
-    # def __new__(cls, *args, **kwargs):
-    #     super(BaseModel, cls).__new__(cls, *args, **kwargs)
-    #     __all__.append(cls.__name__)
 
-
-class Category(BaseModel):
+class Category(db.Model):
     name = CharField()
 
     def __unicode__(self):
         return self.name
 
 
-class Contact(BaseModel):
+class Contact(db.Model):
     club = CharField(null=True)
     address = CharField(null=True)
     city = CharField(null=True)
@@ -53,7 +55,7 @@ class Contact(BaseModel):
     email = CharField()
 
 
-class Entry(BaseModel):
+class Entry(db.Model):
     # code = CharField()
     created = DateTimeField(default=datetime.datetime.now)
     pass_code = CharField(default=new_passcode)
@@ -61,16 +63,20 @@ class Entry(BaseModel):
 
     @property
     def code(self):
-        return '{}{}'.format(self.created.year, self.id)  # todo
+        return '{}{:0>4}'.format(self.created.strftime('%y'), self.id)
+
+    @staticmethod
+    def get_id(code):
+        return int(code[2:])
 
 
-class Contestant(BaseModel):
+class Contestant(db.Model):
     name = CharField()
     category = ForeignKeyField(Category)
     entry = ForeignKeyField(Entry, 'contestants')
 
 
-class Start(BaseModel):
+class Start(db.Model):
     number = PrimaryKeyField()
     contestant = ForeignKeyField(Contestant, 'starts', unique=True)
     # number = IntegerField(index=True, unique=True)  # sequence=
@@ -94,7 +100,7 @@ class Start(BaseModel):
         cls.insert_many({'contestant': c} for c in contestants).execute()
 
 
-# class Time(BaseModel):
+# class Time(db.Model):
 #     gate = IntegerField()
 #     line = IntegerField()
 #     # number = ForeignKeyField()
@@ -102,10 +108,31 @@ class Start(BaseModel):
 #     time = DateTimeField()
 
 
-class Check(BaseModel):
+# select start.number, contestant.*, sum(check.points) as points_sum, max(check.time) - start.time as bare_time, points_sum * 2min + bare_time as final_time from check left join by start left join by contstant group by start.number order by final_time asc;
+
+
+class Check(db.Model):
     gate = IntegerField()
     line = IntegerField()
-    # number = ForeignKeyField()
-    number = IntegerField()
+    number = ForeignKeyField(Start, 'checks')
     points = IntegerField(default=0)
     time = DateTimeField(null=True)
+
+    @classmethod
+    def from_csv(cls, file, gate):
+        cls.insert_many(cls._query_from_csv(file, gate)).execute()
+
+    @staticmethod
+    def _query_from_csv(file, gate):
+        reader = csv.reader(file)
+        for count, line in enumerate(reader):
+            try:
+                yield {
+                    'gate': gate,
+                    'line': count,
+                    'number': int(line[0]),
+                    'points': int(line[1])
+                }
+            except (ValueError, IndexError):
+                continue
+

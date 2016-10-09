@@ -1,0 +1,18 @@
+{% extends "main.html" %}
+
+{% block content %}
+    {% for category in results %}
+        <span class="header">Výsledky {{ category }}</span>
+        <table>
+        {% for contestant in category %}
+            <tr>
+                <td>{{ contestant.order }}</td>
+                <td>{{ contestant.name }}</td>
+                <td>{{ contestant.club }}</td>
+                <td>{{ contestant.time }}</td>
+{#                <td>{{ contestant.points }}</td>#}
+            </tr>
+        {% endfor %}
+        </table>
+    {% endfor %}
+{% endblock %}
