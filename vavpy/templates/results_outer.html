@@ -12,8 +12,8 @@
                     <th>Oddíl</th>
                     <th>Disk</th>
                     <th>Čistý Čas</th>
-                    <th>Body</th>
-                    <th>Výsledný čas</th>
+                    <th>Body za Branky</th>
+                    <th>Celkové Body</th>
                 </tr>
             </thead>
             <tbody>
@@ -25,9 +25,8 @@
                     <td>{{ cnt.club }}</td>
                     <td>{{ cnt.disqualified }}</td>
                     <td>{{ cnt.clear_time | time }}</td>
+                    <td>{{ cnt.points }}</td>
                     <td>{{ cnt.sum_points }}</td>
-                    <td>{{ cnt.final_time | time }}</td>
-
                 </tr>
             {% endfor %}
         </tbody>

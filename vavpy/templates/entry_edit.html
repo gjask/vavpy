@@ -1,15 +1,5 @@
 {% extends "main.html" %}
 
-{% block head %}
-    {{ super() }}
-{#    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>#}
-{#    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">#}
-{#    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>#}
-
-{#    <script type="text/javascript" src="{{ url_for('static', filename='repeatable-fields.js') }}"></script>#}
-{#    <script type="text/javascript" src="{{ url_for('static', filename='dynamic-form.js') }}"></script>#}
-{% endblock %}
-
 {% block content %}
     <span class="header">Edit Entry</span>
     <form method="POST">
@@ -51,34 +41,3 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='dynamic-form.js') }}"></script>
 {% endblock %}
-
-{#{% block content %}#}
-{#    <form method="POST">#}
-{#        {{ form.contact() }}#}
-{#        <div class="wrapper">#}
-{#            <span class="add">Add</span>#}
-{#            <table class="container">#}
-{#                {% for item in form.contestants[0] %}#}
-{#                    <th>{{ item.label.text }}</th>#}
-{#                {% endfor %}#}
-{#                </tr>#}
-{#            {% for contestant in form.contestants %}#}
-{#                <tr>#}
-{#                {% for item in contestant.form %}#}
-{#                    <td>{{ item }}</td>#}
-{#                {% endfor %}#}
-{#                </tr>#}
-{#            {% endfor %}#}
-{#            </table>#}
-{#        </div>#}
-{#        <input type="submit" name="submit" value="Save">#}
-{#    </form>#}
-{##}
-{#    <script type="text/javascript">#}
-{#        jQuery(function() {#}
-{#            jQuery('.repeat').each(function() {#}
-{#                jQuery(this).repeatable_fields();#}
-{#            });#}
-{#        });#}
-{#    </script>#}
-{#{% endblock %}#}

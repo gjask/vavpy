@@ -11,22 +11,22 @@
     </table>
     <table class="list">
         <tr>
-            <th>#</th>
-            <th>Start Time</th>
-            <th>Name</th>
-            <th>Category</th>
+            <th>Číslo</th>
+            <th>Čas startu</th>
+            <th>Jméno</th>
+            <th>Kategoie</th>
         </tr>
     {% for cnt in entry.contestants %}
         <tr>
         {% if cnt.starts %}
             <td>{{ cnt.starts.get().number }}</td>
-            <td>{{ cnt.starts.get().time }}</td>
+            <td>{{ cnt.starts.get().time | time }}</td>
         {% else %}
             <td>-</td>
             <td>-</td>
         {% endif %}
             <td>{{ cnt.name }}</td>
-            <td>{{ cnt.category }}</td>
+            <td>{{ cnt.category.name }}</td>
         </tr>
     {% endfor %}
     </table>

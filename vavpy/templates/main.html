@@ -1,4 +1,3 @@
-{#{% from "macros.html" import render_form_or_field with context %}#}
 {% from "macros.html" import simple_form %}
 {% set title='Vavřinecký potok' %}
 
@@ -10,6 +9,19 @@
     <title>{{ title }}</title>
     <style>
     {% block style %}
+        @page {
+            size: A4;
+            margin: 8mm 10mm; /* change the margins as you want them to be. */
+        }
+        table {
+            page-break-inside:auto
+        }
+        tr {
+            page-break-inside:avoid; page-break-after:auto
+        }
+        thead, thead {
+            display:table-header-group
+        }
         body {
             font-size: 0.9em;
         }
@@ -35,12 +47,16 @@
         .header {
             font: 1.4em bold
         }
+        .menu {
+            float: right;
+        }
     {% endblock %}
     </style>
 {% endblock %}
 </head>
 <body>
 {#<h1>{{ title }}</h1>#}
+{#<a href="{{ url_for('dashboard_view') }}" class="menu">Home</a>#}
 <div class="flashes">
     {% for message in get_flashed_messages() %}
     <h3>{{ message }}</h3>

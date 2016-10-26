@@ -20,17 +20,25 @@
         {{ check.gate }}({{ check.count }})
     {% endfor %}
     <br>
-    <span class="header">Results</span><br>
+    <span class="header">Results Inner</span><br>
     {% for cat in categories %}
-        <a href="{{ url_for('results_view', category=cat.name) }}">{{ cat.name }}</a>
-    {% endfor %}<br>
+        <a href="{{ url_for('results_view', category_name=cat.name) }}">{{ cat.name }}</a>
+        (<a href="{{ url_for('results_view', category_name=cat.name, csv_export='csv') }}">.csv</a> )
+    {% endfor %}
+    <br>
+    <span class="header">Results Final</span><br>
+    {% for cat in categories %}
+        <a href="{{ url_for('results_outer_view', category_name=cat.name) }}">{{ cat.name }}</a>
+        (<a href="{{ url_for('results_outer_view', category_name=cat.name, csv_export='csv') }}">.csv</a> )
+    {% endfor %}
+    <br>
     <span class="header">Start List</span>
     <table>
         {% for cnt in start_list %}
             <tr>
 {#                <td>Up Down Edit Del ?</td>#}
                 <td>{{ cnt.number }}</td>
-                <td>{{ cnt.time }}</td>
+                <td>{{ (cnt.real_time or cnt.time) | time }}</td>
                 <td>{{ cnt.contestant.category.name }}</td>
                 <td>{{ cnt.contestant.name }}</td>
                 <td>{{ cnt.contestant.entry.contact.club }}</td>

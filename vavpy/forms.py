@@ -1,7 +1,7 @@
 # from flask_wtf import Form
 from wtforms import Form
 from wtforms import FormField, FieldList, StringField, SubmitField, \
-    IntegerField, SelectField, HiddenField, validators, FileField
+    IntegerField, SelectField, HiddenField, validators, FileField, TextAreaField
 from wtforms.widgets import HiddenInput
 from wtfpeewee.orm import model_form, ModelConverter, PrimaryKeyField
 
@@ -69,3 +69,8 @@ class UploadCheckForm(Form):
     check_number = IntegerField(validators=[validators.DataRequired()])
     table = FileField()  # validators=[validators.DataRequired()])
     upload = SubmitField()
+
+
+class SQLForm(Form):
+    query = TextAreaField(validators=[validators.DataRequired()])
+    execute = SubmitField()

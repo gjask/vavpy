@@ -1,27 +1,31 @@
 {% extends "main.html" %}
 
 {% block content %}
-    <span class="header">Startovní listina</span>
+{#    <span class="header">Startovní listina</span>#}
     <table>
-        <tr>
-            <th>#</th>
-            <th>Čas</th>
-            <th>Kategorie</th>
-            <th>Jméno</th>
-            <th>Oddíl</th>
-            <th>Body</th>
-            <th>Odstartoval</th>
-        </tr>
-    {% for cnt in start_list %}
-        <tr>
-            <td>{{ cnt.number }}</td>
-            <td>{{ cnt.time }}</td>
-            <td>{{ cnt.contestant.category.name }}</td>
-            <td>{{ cnt.contestant.name }}</td>
-            <td>{{ cnt.contestant.entry.contact.club }}</td>
-            <td></td>
-            <td></td>
-        </tr>
-    {% endfor %}
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Čas</th>
+                <th>Kategorie</th>
+                <th>Jméno</th>
+                <th>Oddíl</th>
+                <th>Body</th>
+                <th>Odstartoval</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for cnt in start_list %}
+            <tr>
+                <td>{{ cnt.number }}</td>
+                <td>{{ cnt.time | time }}</td>
+                <td>{{ cnt.contestant.category.name }}</td>
+                <td>{{ cnt.contestant.name }}</td>
+                <td>{{ cnt.contestant.entry.contact.club }}</td>
+                <td></td>
+                <td></td>
+            </tr>
+        {% endfor %}
+        </tbody>
     </table>
 {% endblock %}
