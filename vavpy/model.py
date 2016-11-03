@@ -1,11 +1,13 @@
-from peewee import Model, CharField, IntegerField, ForeignKeyField,\
-    DateTimeField, BooleanField, TimeField, PrimaryKeyField, Proxy
+from peewee import CharField, IntegerField, ForeignKeyField, DateTimeField,\
+    BooleanField, PrimaryKeyField, Proxy
 import datetime
 import random
 import string
 import csv
 from playhouse import db_url, flask_utils
 
+
+# todo db.create_tables([], safe=True)
 
 # __all__ = []
 __all__ = ['Category', 'Entry', 'Contact', 'Contestant', 'Start', 'Check', 'db',
@@ -23,21 +25,6 @@ def connect_manually(url, **kwargs):
     else:
         db.database = conn
     return db.database
-
-
-def dt_add(time, delta):
-    realtime = datetime.datetime.combine(datetime.date.today(), time)
-    realtime += delta
-    return realtime.time()
-
-
-def dd_decrease(time_a, time_b):
-    time_a = datetime.time(*[int(x) for x in time_a.split(':')])
-    # time_b = datetime.time(*[int(x) for x in time_b.split(':')])
-
-    rt_a = datetime.datetime.combine(datetime.date.today(), time_a)
-    rt_b = datetime.datetime.combine(datetime.date.today(), time_b)
-    return rt_a - rt_b
 
 
 def time2str(time_int):
@@ -172,3 +159,7 @@ class Check(db.Model):
             except (ValueError, IndexError):
                 continue
 
+
+# todo create model and sql view
+# class Results(db.Model):
+#     pass

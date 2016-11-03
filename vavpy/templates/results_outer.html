@@ -22,10 +22,10 @@
                     <td>{{ num + 1 }}</td>
                     <td>{{ cnt.number }}</td>
                     <td>{{ cnt.name }}</td>
-                    <td>{{ cnt.club }}</td>
-                    <td>{{ cnt.disqualified }}</td>
+                    <td>{{ cnt.club or '' }}</td>
+                    <td>{{ 'X' if cnt.disqualified else '' }}</td>
                     <td>{{ cnt.clear_time | time }}</td>
-                    <td>{{ cnt.points }}</td>
+                    <td>{{ cnt.points or 0 }}</td>
                     <td>{{ cnt.sum_points }}</td>
                 </tr>
             {% endfor %}

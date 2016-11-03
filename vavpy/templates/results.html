@@ -2,7 +2,7 @@
 
 {% block content %}
 {#    {% for category in results %}#}
-        <span class="header">Výsledky Vavřinecký potok 2016 - {{ category }}</span>
+        <span class="header">Výsledky Vavřinecký potok 2016 - {{ category }} Vložený závod</span>
         <table>
             <thead>
                 <tr>
@@ -22,10 +22,10 @@
                     <td>{{ num + 1 }}</td>
                     <td>{{ cnt.number }}</td>
                     <td>{{ cnt.name }}</td>
-                    <td>{{ cnt.club }}</td>
-                    <td>{{ cnt.disqualified }}</td>
+                    <td>{{ cnt.club or '' }}</td>
+                    <td>{{ 'X' if cnt.disqualified else '' }}</td>
                     <td>{{ cnt.clear_time | time }}</td>
-                    <td>{{ cnt.sum_points }}</td>
+                    <td>{{ cnt.sum_points or 0 }}</td>
                     <td>{{ cnt.final_time | time }}</td>
 
                 </tr>

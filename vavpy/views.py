@@ -1,15 +1,13 @@
 from flask import Flask, render_template, abort, request, redirect, url_for,\
     flash, Response
 from playhouse.flask_utils import get_object_or_404
-from peewee import fn, JOIN, RawQuery
+from peewee import fn, JOIN
 import io
 import csv
-import datetime
 
 from vavpy.forms import *
 from .model import *
 from .model import time2str
-from .model import dd_decrease
 
 
 app = Flask(__name__)
