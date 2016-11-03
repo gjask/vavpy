@@ -81,6 +81,16 @@ class Contestant(db.Model):
     entry = ForeignKeyField(Entry, 'contestants')
 
 
+class Gate(db.Model):
+    number = IntegerField(unique=True, null=True)
+    name = CharField(unique=True, null=True)
+    note = CharField(null=True)
+
+    @property
+    def ident(self):
+        return self.name or self.number
+
+
 class Start(db.Model):
     number = PrimaryKeyField()
     contestant = ForeignKeyField(Contestant, 'starts', unique=True)
@@ -108,7 +118,7 @@ class Start(db.Model):
 
 
 class Check(db.Model):
-    gate = IntegerField()
+    gate = ForeignKeyField(Gate, 'checks')
     line = IntegerField()
     number = ForeignKeyField(Start, 'checks')
     points = IntegerField(default=0)
@@ -142,6 +152,66 @@ class Check(db.Model):
                 continue
 
 
-# todo create model and sql view
-# class Results(db.Model):
-#     pass
+class Result(db.Model):
+    _view_name = 'result'
+
+    # todo dynamically bind gates
+
+    number = PrimaryKeyField()
+    name = CharField()
+    club = CharField(null=True)
+    sum_points = IntegerField(null=True)
+    disqualified = BooleanField()
+    clear_time = IntegerField(null=True)
+    final_time = IntegerField(null=True)
+
+    @classmethod
+    def set_view(cls):
+        _point_penalty = 120
+        _final_gate = 5
+        _gates = range(1, _final_gate + 1)
+
+        create_sql = """
+            create view {view} as
+            select
+                s.number, c.name, a.club, p.sum_points,
+                {dg_head},
+                (g.time is null or s.disqualified) as 'disqualified',
+                g.time - s.real_time as 'clear_time',
+                g.time - s.real_time + sum_points * {penalty} as 'final_time'
+            from start s
+            left join (
+                select
+                    number_id, time
+                from 'check'
+                where gate = {goal}
+            ) g on s.number = g.number_id
+            left join (
+                select
+                    number_id,
+                    sum(points) as 'sum_points',
+                    {distinct_gates}
+                from 'check'
+                where gate in ({gates})
+                group by number_id
+            ) p on s.number = p.number_id
+            left join contestant c on c.id = s.contestant_id
+            left join category k on c.category_id = k.id
+            left join entry e on e.id = c.entry_id
+            left join contact a on a.id = e.id
+            order by disqualified asc, final_time asc;
+        """.format(
+            view=cls._view_name,
+            penalty=_point_penalty,
+            goal=_final_gate,
+            gates=', '.join(str(g) for g in _gates),
+            dg_head=', '.join('g{}'.format(i) for i in _gates),
+            distinct_gates=',\n'.join(
+                'sum(case when gate = {i} then points end) g{i}'.format(i=i)
+                for i in _gates
+            )
+        )
+
+        with db.database.atomic():
+            db.database.execute_sql('drop view if exists %s;' % cls._view_name)
+            db.database.execute_sql(create_sql)
