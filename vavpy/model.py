@@ -9,12 +9,10 @@ from playhouse import db_url, flask_utils
 
 # todo db.create_tables([], safe=True)
 
-# __all__ = []
 __all__ = ['Category', 'Entry', 'Contact', 'Contestant', 'Start', 'Check', 'db',
            'connect_manually']
 
 _letters = string.ascii_letters + string.digits
-# db = db_url.connect('sqlite:///test.db')
 db = flask_utils.FlaskDB()
 
 
@@ -41,8 +39,6 @@ def new_passcode():
     return ''.join(random.choice(_letters) for i in range(6))
 
 
-# first_start = datetime.time(9, 30)  # todo move to database or setting
-# step = datetime.timedelta(seconds=30)
 first_start = str2time('09:30:00')  # todo move to database or setting
 step = 30  # seconds
 
@@ -111,23 +107,11 @@ class Start(db.Model):
         cls.insert_many({'contestant': c} for c in contestants).execute()
 
 
-# class Time(db.Model):
-#     gate = IntegerField()
-#     line = IntegerField()
-#     # number = ForeignKeyField()
-#     number = IntegerField()
-#     time = DateTimeField()
-
-
-# select start.number, contestant.*, sum(check.points) as points_sum, max(check.time) - start.time as bare_time, points_sum * 2min + bare_time as final_time from check left join by start left join by contstant group by start.number order by final_time asc;
-# select number_id, gate, count(line) as 'n' from 'check' as 'c' group by gate, number_id order by number_id, gate;
-
 class Check(db.Model):
     gate = IntegerField()
     line = IntegerField()
     number = ForeignKeyField(Start, 'checks')
     points = IntegerField(default=0)
-    # time = TimeField(null=True)
     time = IntegerField(null=True)
 
     @classmethod
@@ -144,8 +128,6 @@ class Check(db.Model):
         for count, line in enumerate(reader):
             try:
                 if len(line) >= 3:
-                    # h, m, s = (int(x) for x in line[2].split(':'))
-                    # time = datetime.time(h, m, s)
                     time = str2time(line[2])
                 else:
                     time = None
