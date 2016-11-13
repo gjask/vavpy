@@ -1,5 +1,5 @@
 from peewee import CharField, IntegerField, ForeignKeyField, DateTimeField,\
-    BooleanField, PrimaryKeyField, Proxy, ReverseRelationDescriptor
+    BooleanField, PrimaryKeyField, Proxy, ReverseRelationDescriptor, fn
 import datetime
 import random
 import string
@@ -10,7 +10,7 @@ from playhouse import db_url, flask_utils
 # todo db.create_tables([], safe=True)
 
 __all__ = ['Category', 'Entry', 'Contact', 'Contestant', 'Start', 'Check', 'db',
-           'connect_manually']
+           'connect_manually', 'Result', 'Result_vloz']
 
 _letters = string.ascii_letters + string.digits
 db = flask_utils.FlaskDB()
@@ -41,6 +41,7 @@ def new_passcode():
 
 first_start = str2time('09:30:00')  # todo move to database or setting
 step = 30  # seconds
+missing_numbers = []
 
 
 class Category(db.Model):
@@ -80,6 +81,9 @@ class Contestant(db.Model):
     category = ForeignKeyField(Category)
     entry = ForeignKeyField(Entry, 'contestants')
 
+    def __unicode__(self):
+        return self.name
+
 
 class Gate(db.Model):
     number = IntegerField(unique=True, null=True)
@@ -99,9 +103,11 @@ class Start(db.Model):
     real_time = IntegerField(null=True)
     disqualified = BooleanField(default=False)
 
+    def __unicode__(self):
+        return str(self.number)
+
     @property
     def time(self):
-        # return dt_add(first_start, step * (self.number - 1))
         return first_start + step * (self.number - 1)
 
     # @classmethod
@@ -114,7 +120,14 @@ class Start(db.Model):
 
     @classmethod
     def schedule_contestants(cls, contestants):
-        cls.insert_many({'contestant': c} for c in contestants).execute()
+        first = Start.select(fn.Max(Start.number) + 1).scalar()
+        data = []
+        delta = 0
+        for n, contestant in enumerate(contestants):
+            if n in missing_numbers:
+                delta += 1
+            data.append({'contestant': contestant, 'number': first + n + delta})
+        cls.insert_many(data).execute()
 
 
 class Check(db.Model):
@@ -124,6 +137,18 @@ class Check(db.Model):
     number = ForeignKeyField(Start, 'checks')
     points = IntegerField(default=0)
     time = IntegerField(null=True)
+
+    @classmethod
+    def grouped_by_number(cls, category=None):
+        res = {}  # todo defaultdict
+        query = cls.select()
+
+        for check in query:
+            if check.number_id not in res:
+                res[check.number_id] = {}
+            res[check.number_id][check.gate] = check.points
+
+        return res
 
     @classmethod
     def from_csv(cls, file, gate):
@@ -153,13 +178,14 @@ class Check(db.Model):
                 continue
 
 
-class Result(db.Model):
-    _view_name = 'result'
+class Result_vloz(db.Model):
+    _view_name = 'result_vloz'
     _point_penalty = 120
     _final_gate = 5
     _gates = list(range(1, _final_gate + 1))
 
-    number = PrimaryKeyField()
+    number = ForeignKeyField(Start, 'results_vloz',
+                             primary_key=True, db_column='number')
     sum_points = IntegerField(null=True)
     disqualified = BooleanField()
     clear_time = IntegerField(null=True)
@@ -209,15 +235,15 @@ class Result(db.Model):
             db.database.execute_sql(create_sql)
 
 
-class Result_outer(db.Model):
-    _view_name = 'result_outer'
+class Result(db.Model):
+    _view_name = 'result'
     _point_penalty = 120
     _step = 120
-    _final_gate = 5
+    _final_gate = 8
     _gates = list(range(1, _final_gate + 1))
 
-
-    number = PrimaryKeyField()
+    number = ForeignKeyField(Start, 'result',
+                             primary_key=True, db_column='number')
     points = IntegerField(null=True)
     disqualified = BooleanField()
     clear_time = IntegerField(null=True)
