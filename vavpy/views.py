@@ -140,7 +140,11 @@ def start_list_view(from_n=None, to_n=None):
 def results_view(category_name=None, csv_export=False):
     category = get_object_or_404(Category, (Category.name == category_name))
     results = (
-        Result_vloz.select(Start, Result_vloz, Contestant, Contact)
+        Result_vloz.select(
+            Start.number, Contestant.name, Contact.club,
+            Result_vloz.disqualified, Result_vloz.sum_points,
+            Result_vloz.clear_time, Result_vloz.final_time
+        )
         .join(Start)
         .join(Contestant)
         .join(Entry)
@@ -149,24 +153,24 @@ def results_view(category_name=None, csv_export=False):
     )
     checks = Check.grouped_by_number()
 
-    # csv_headers = ['order', 'number', 'name', 'club', 'disqualified',
-    #                'sum_points', 'clear_time', 'final_time']
-    #
-    # if csv_export:
-    #     file = 'vysledky_vloz_{}.csv'.format(category_name)
-    #     stream = io.StringIO()
-    #     writer = csv.DictWriter(stream, csv_headers)
-    #     writer.writeheader()
-    #
-    #     for order, line in enumerate(results.dicts(), 1):
-    #         line['order'] = order
-    #         line['clear_time'] = time2str(line['clear_time'] or 0)
-    #         writer.writerow(line)
-    #
-    #     stream.seek(0)
-    #     resp = Response(stream, content_type='text/csv')
-    #     resp.headers['Content-Disposition'] = "attachment; filename=%s" % file
-    #     return resp
+    csv_headers = ['order', 'number', 'name', 'club', 'disqualified',
+                   'sum_points', 'clear_time', 'final_time']
+
+    if csv_export:
+        file = 'vysledky_vloz_{}.csv'.format(category_name)
+        stream = io.StringIO()
+        writer = csv.DictWriter(stream, csv_headers)
+        writer.writeheader()
+
+        for order, line in enumerate(results.dicts(), 1):
+            line['order'] = order
+            line['clear_time'] = time2str(line['clear_time'] or 0)
+            writer.writerow(line)
+
+        stream.seek(0)
+        resp = Response(stream, content_type='text/csv')
+        resp.headers['Content-Disposition'] = "attachment; filename=%s" % file
+        return resp
 
     return render_template(
         'results.html',
@@ -180,7 +184,10 @@ def results_view(category_name=None, csv_export=False):
 def results_outer_view(category_name=None, csv_export=False):
     category = get_object_or_404(Category, (Category.name == category_name))
     results = (
-        Result.select(Start, Result, Contestant, Contact)
+        Result.select(
+            Start.number, Contestant.name, Contact.club, Result.points,
+            Result.disqualified, Result.clear_time, Result.sum_points
+        )
         .join(Start)
         .join(Contestant)
         .join(Entry)
@@ -189,24 +196,24 @@ def results_outer_view(category_name=None, csv_export=False):
     )
     checks = Check.grouped_by_number()
 
-    # csv_headers = ['order', 'number', 'name', 'club', 'points', 'disqualified',
-    #                'clear_time', 'sum_points']
+    csv_headers = ['order', 'number', 'name', 'club', 'points', 'disqualified',
+                   'clear_time', 'sum_points']
 
-    # if csv_export:
-    #     file = 'vysledky_{}.csv'.format(category_name)
-    #     stream = io.StringIO()
-    #     writer = csv.DictWriter(stream, csv_headers)
-    #     writer.writeheader()
-    #
-    #     for order, line in enumerate(results.dicts(), 1):
-    #         line['order'] = order
-    #         line['clear_time'] = time2str(line['clear_time'] or 0)
-    #         writer.writerow(line)
-    #
-    #     stream.seek(0)
-    #     resp = Response(stream, content_type='text/csv')
-    #     resp.headers['Content-Disposition'] = "attachment; filename=%s" % file
-    #     return resp
+    if csv_export:
+        file = 'vysledky_{}.csv'.format(category_name)
+        stream = io.StringIO()
+        writer = csv.DictWriter(stream, csv_headers)
+        writer.writeheader()
+
+        for order, line in enumerate(results.dicts(), 1):
+            line['order'] = order
+            line['clear_time'] = time2str(line['clear_time'] or 0)
+            writer.writerow(line)
+
+        stream.seek(0)
+        resp = Response(stream, content_type='text/csv')
+        resp.headers['Content-Disposition'] = "attachment; filename=%s" % file
+        return resp
 
     return render_template(
         'results_outer.html',
