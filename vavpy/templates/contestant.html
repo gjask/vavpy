@@ -1,0 +1,12 @@
+{% extends "main.html" %}
+
+{% block content %}
+    <table>
+    {% for check in checks %}
+        <tr>
+            <th>check.gate</th>
+            <td>check.points</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endblock %}

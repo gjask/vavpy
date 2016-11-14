@@ -12,7 +12,7 @@ from .model import time2str
 
 app = Flask(__name__)
 app.secret_key = 'SOME_BULLSHIT'
-app.config['DATABASE'] = 'sqlite:///test.db'
+app.config['DATABASE'] = 'sqlite:///test.db1'
 
 db.init_app(app)
 

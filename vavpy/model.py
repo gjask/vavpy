@@ -41,7 +41,15 @@ def new_passcode():
 
 first_start = str2time('09:30:00')  # todo move to database or setting
 step = 30  # seconds
-missing_numbers = []
+missing_numbers = [5, 6, 10, 12]
+
+
+def _missing_contestant():
+    # I am sad about this
+    contact = Contact.create(phone='-', email='-')
+    e = Entry.create(contact=contact)
+    c = Category.get()
+    return Contestant.create(name='< Chybějící číslo >', entry=e, category=c)
 
 
 class Category(db.Model):
@@ -120,18 +128,22 @@ class Start(db.Model):
 
     @classmethod
     def schedule_contestants(cls, contestants):
-        first = Start.select(fn.Max(Start.number) + 1).scalar()
+        number = Start.select(fn.Max(Start.number) + 1).scalar() or 1
         data = []
-        delta = 0
-        for n, contestant in enumerate(contestants):
-            if n in missing_numbers:
-                delta += 1
-            number = first + n + delta
+        for contestant in contestants:
+            while number in missing_numbers:
+                data.append({
+                    'contestant': _missing_contestant(),
+                    'number': number,
+                    'disqualified': True
+                })
+                number += 1
             data.append({
                 'contestant': contestant,
                 'number': number,
                 'real_time': first_start + (number - 1) * step
             })
+            number += 1
         cls.insert_many(data).execute()
 
 
