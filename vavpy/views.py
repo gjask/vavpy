@@ -12,7 +12,7 @@ from .model import time2str
 
 app = Flask(__name__)
 app.secret_key = 'SOME_BULLSHIT'
-app.config['DATABASE'] = 'sqlite:///test.db1'
+app.config['DATABASE'] = 'sqlite:///test.db'
 
 db.init_app(app)
 
@@ -251,7 +251,7 @@ def search_view(keyword=None):
         )
 
         try:
-            number = int(kw)
+            number = int(form.keyword.data)
         except (ValueError, TypeError):
             pass
         else:
