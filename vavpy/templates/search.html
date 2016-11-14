@@ -1,0 +1,33 @@
+{% extends "main.html" %}
+
+{% block content %}
+    <span class="header">Search</span>
+    <p>Don't forget use % as placeholder for fulltext search. Search based on SQL ILIKE construct.</p>
+    {{ simple_form(form) }}
+    <span class="header">Search results</span>
+    {% if search %}
+        <table>
+            <tr>
+                <th>#</th>
+                <th>Start Time</th>
+                <th>Entry</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Club</th>
+            </tr>
+        {% for line in search %}
+            <tr>
+{#              todo results or in different view? #}
+                <td>{{ line.number }}</td>
+                <td>{{ line.time | time }}</td>
+                <td><a href="{{ url_for('.edit_entry_view', entry_id=line.contestant.entry.id) }}">
+                    {{ line.contestant.entry.id }}
+                </a></td>
+                <td>{{ line.contestant.name }}</td>
+                <td>{{ line.contestant.category.name }}</td>
+                <td>{{ line.contestant.entry.contact.club }}</td>
+            </tr>
+        {% endfor %}
+        </table>
+    {% endif %}
+{% endblock %}

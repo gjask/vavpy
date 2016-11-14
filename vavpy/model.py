@@ -108,7 +108,7 @@ class Start(db.Model):
 
     @property
     def time(self):
-        return first_start + step * (self.number - 1)
+        return self.real_time or (first_start + step * (self.number - 1))
 
     # @classmethod
     # def schedule_entry(cls, entry):
@@ -126,7 +126,12 @@ class Start(db.Model):
         for n, contestant in enumerate(contestants):
             if n in missing_numbers:
                 delta += 1
-            data.append({'contestant': contestant, 'number': first + n + delta})
+            number = first + n + delta
+            data.append({
+                'contestant': contestant,
+                'number': number,
+                'real_time': first_start + (number - 1) * step
+            })
         cls.insert_many(data).execute()
 
 

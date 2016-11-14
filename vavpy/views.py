@@ -34,6 +34,7 @@ def dashboard_view():
     checkpoints = Check.select(Check.gate, fn.Count(Check.id).alias('count'))\
         .group_by(Check.gate)
 
+    search_form = SearchForm(request.form)
     check_form = UploadCheckForm(request.form)
     code_form = FromCodeEntryForm(request.form)
     print_form = PrintStartListForm(request.form)
@@ -71,6 +72,7 @@ def dashboard_view():
         'dashboard.html',
         categories=Category.select(),
         start_list=start_list,
+        search_form=search_form,
         pass_code_form=code_form,
         print_form=print_form,
         check_form=check_form,
@@ -225,12 +227,45 @@ def results_outer_view(category_name=None, csv_export=False):
 
 @app.route('/contestant/<int:contestant_id>')
 def contestant_view(contestant_id):
-    pass  # todo
+    contestant = get_object_or_404(Contestant, (Contestant.id == contestant_id))
+    checks = Check.select().where()
+    return render_template('contestant.html')
 
 
 @app.route('/broken')
 def broken_records_view():
     pass
+
+
+@app.route('/search', methods=('GET', 'POST'))
+def search_view(keyword=None):
+    form = SearchForm(request.form)
+    query = None
+
+    if request.method == 'POST' and form.validate():
+        kw = '%' + form.keyword.data + '%'
+        contition = (
+            (Contestant.name ** kw)
+            | (Contact.club ** kw)
+            | (Contact.email ** kw)
+        )
+
+        try:
+            number = int(kw)
+        except (ValueError, TypeError):
+            pass
+        else:
+            contition |= (Start.number == number)
+
+        query = (
+            Start.select(Start, Contestant, Contact)
+            .join(Contestant)
+            .join(Entry)
+            .join(Contact)
+            .where(contition)
+        )
+
+    return render_template('search.html', form=form, search=query)
 
 
 # @app.route('/sql', methods=('GET', 'POST'))

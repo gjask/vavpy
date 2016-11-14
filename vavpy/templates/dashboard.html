@@ -1,7 +1,9 @@
 {% extends "main.html" %}
 
 {% block content %}
-    <span class="header">Dashboard</span><br>
+    <span class="header">Search</span><br>
+    {{ simple_form(search_form, url_for('.search_view')) }}
+    <span class="header">Register</span>
     <a href="{{ url_for('edit_entry_view') }}">New Entry</a>
     {{ simple_form(pass_code_form) }}
     {{ simple_form(print_form) }}

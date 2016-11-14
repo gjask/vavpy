@@ -7,35 +7,26 @@ from wtfpeewee.orm import model_form, ModelConverter, PrimaryKeyField
 
 from vavpy.model import Contact, Contestant, Category
 
+
+__all__ = ['NewEntryForm', 'NewEntryForm', 'FromCodeEntryForm',
+           'PrintStartListForm', 'UploadCheckForm', 'SQLForm', 'SearchForm']
+
 # class SelfAwareForm(Form):
 #     def is_submitted(self):
 #         # todo
-
-
-# class ContestantForm(Form):
-#     id = IntegerField()  # widget=HiddenInput())
-#     name = StringField(validators=[validators.DataRequired()])
-#     category = SelectField(validators=[validators.DataRequired()], choices=[])
-#
-#     # def __init__(self, *args, **kwargs):
-#     #     cats = Category.select()
-#     #     self.category.choices = [(cat.name, cat.name) for cat in cats]
-#     #     super(ContestantForm, self).__init__(*args, **kwargs)
 
 
 def handle_pk(model, field, **kwargs):
     return field.name, HiddenField()
 
 
-inline_converter = ModelConverter({PrimaryKeyField: handle_pk})
-
-
 ContestantForm = model_form(
     Contestant,
     exclude=['entry'],
     allow_pk=True,
-    converter=inline_converter
+    converter=ModelConverter({PrimaryKeyField: handle_pk})
 )
+
 ContactForm = model_form(Contact)
 
 
@@ -74,3 +65,8 @@ class UploadCheckForm(Form):
 class SQLForm(Form):
     query = TextAreaField(validators=[validators.DataRequired()])
     execute = SubmitField()
+
+
+class SearchForm(Form):
+    keyword = StringField(validators=[validators.DataRequired()])
+    search = SubmitField()

@@ -1,5 +1,5 @@
-{% macro simple_form(form) %}
-    <form method="POST">
+{% macro simple_form(form, target=None) %}
+    <form method="POST" {% if target %}action="{{ target }}"{% endif %}>
         {% for field in form %}
             {{ field() }}
         {% endfor %}
